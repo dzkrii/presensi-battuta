@@ -13,6 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 
 class UserResource extends Resource
 {
@@ -42,8 +45,9 @@ class UserResource extends Resource
                                     ->required()
                                     ->maxLength(255),
                                 Forms\Components\FileUpload::make('image')
-                                // ->avatar(),
-                                // ->circleCropper(),
+                                    ->required()
+                                    ->avatar()
+                                    ->circleCropper(),
                             ])
                     ]),
                 Forms\Components\Group::make()
@@ -57,8 +61,12 @@ class UserResource extends Resource
                                     ->dehydrateStateUsing(fn($state) => Hash::make($state))
                                     ->dehydrated(fn($state) => filled($state))
                                     ->required(fn(string $context): bool => $context === 'create'),
+                                Forms\Components\TextInput::make('position')
+                                    ->required()
+                                    ->maxLength(255),
                                 Forms\Components\Select::make('roles')
-                                    ->relationship('roles', 'name')
+                                    ->required()
+                                    ->relationship('roles', 'name'),
                                 // ->multiple()
                                 // ->preload()
                                 // ->searchable()
@@ -78,8 +86,9 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('roles.name')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('position')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable()
@@ -93,16 +102,28 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('name', 'asc')
             ->filters([
-                //
+                // make user select filter according to position
+                SelectFilter::make('position')
+                    ->options(function () {
+                        return User::distinct('position')->pluck('position', 'position');
+                    })
+                    ->preload()
+                    ->searchable(),
             ])
+            ->filtersTriggerAction(
+                fn(Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ])
             ]);
     }
 

@@ -6,6 +6,7 @@ use App\Filament\Exports\AttendanceExporter;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource\RelationManagers;
 use App\Models\Attendance;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,8 +21,10 @@ use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Actions;
+use Filament\Tables\Filters\SelectFilter;
 // use Filament\Tables\Actions\ExportBulkAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use Filament\Tables\Actions\Action;
 
 class AttendanceResource extends Resource
 {
@@ -90,32 +93,39 @@ class AttendanceResource extends Resource
                     ->searchable()
                     ->label('Nama')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('is_late')
-                    ->label('Status')
-                    ->badge()
-                    ->getStateUsing(function ($record) {
-                        return $record->isLate() ? 'Terlambat' : 'Tepat Waktu';
-                    })
-                    ->color(fn(string $state): string => match ($state) {
-                        'Tepat Waktu' => 'success',
-                        'Terlambat' => 'danger',
-                    }),
+
+                // Tables\Columns\TextColumn::make('is_late')
+                //     ->label('Status')
+                //     ->badge()
+                //     ->getStateUsing(function ($record) {
+                //         return $record->isLate() ? 'Terlambat' : 'Tepat Waktu';
+                //     })
+                //     ->color(fn(string $state): string => match ($state) {
+                //         'Tepat Waktu' => 'success',
+                //         'Terlambat' => 'danger',
+                //     }),
+                Tables\Columns\TextColumn::make('user.position')
+                    ->searchable()
+                    ->label('Position')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('start_time')
                     ->label('Waktu Masuk'),
                 Tables\Columns\TextColumn::make('end_time')
                     ->label('Waktu Pulang'),
-                Tables\Columns\TextColumn::make('work_duration')
-                    ->label('Durasi Kerja')
-                    ->getStateUsing(function ($record) {
-                        return $record->workDuration();
-                    })
+                // Tables\Columns\TextColumn::make('work_duration')
+                //     ->label('Durasi Kerja')
+                //     ->getStateUsing(function ($record) {
+                //         return $record->workDuration();
+                //     })
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from'),
-                        DatePicker::make('created_until'),
+                        DatePicker::make('created_from')
+                            ->default(now()),
+                        DatePicker::make('created_until')
+                            ->default(now()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -142,8 +152,18 @@ class AttendanceResource extends Resource
                         }
 
                         return $indicators;
-                    })
+                    }),
+                SelectFilter::make('position')
+                    ->relationship('user', 'position')
+                    ->preload()
+                    ->searchable()
+                    ->label('Position'),
             ])
+            ->filtersTriggerAction(
+                fn(Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

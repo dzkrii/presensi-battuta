@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'image',
-        'position',
+        'position_id',
     ];
 
     /**
@@ -58,5 +58,10 @@ class User extends Authenticatable
     public function getImageUrlAttribute()
     {
         return $this->image ? url('storage/' . $this->image) : null;
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
     }
 }

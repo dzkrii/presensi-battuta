@@ -34,7 +34,7 @@ class AttendanceResource extends Resource
 
     protected static ?string $navigationGroup = 'Attendance Management';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 7;
 
     public static function form(Form $form): Form
     {
@@ -104,7 +104,7 @@ class AttendanceResource extends Resource
                 //         'Tepat Waktu' => 'success',
                 //         'Terlambat' => 'danger',
                 //     }),
-                Tables\Columns\TextColumn::make('user.position')
+                Tables\Columns\TextColumn::make('user.position.name')
                     ->searchable()
                     ->label('Position')
                     ->sortable(),
@@ -154,7 +154,7 @@ class AttendanceResource extends Resource
                         return $indicators;
                     }),
                 SelectFilter::make('position')
-                    ->relationship('user', 'position')
+                    ->relationship('user.position', 'name')
                     ->preload()
                     ->searchable()
                     ->label('Position'),

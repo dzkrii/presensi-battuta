@@ -25,7 +25,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationGroup = 'User Management';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
 
 
@@ -61,9 +61,11 @@ class UserResource extends Resource
                                     ->dehydrateStateUsing(fn($state) => Hash::make($state))
                                     ->dehydrated(fn($state) => filled($state))
                                     ->required(fn(string $context): bool => $context === 'create'),
-                                Forms\Components\TextInput::make('position')
+                                Forms\Components\Select::make('position')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->preload()
+                                    ->searchable()
+                                    ->relationship('position', 'name'),
                                 Forms\Components\Select::make('roles')
                                     ->required()
                                     ->relationship('roles', 'name'),
@@ -86,7 +88,7 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('position')
+                Tables\Columns\TextColumn::make('position.name')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email_verified_at')
@@ -105,12 +107,17 @@ class UserResource extends Resource
             ->defaultSort('name', 'asc')
             ->filters([
                 // make user select filter according to position
+                // SelectFilter::make('position')
+                //     ->options(function () {
+                //         return User::distinct('position')->pluck('position', 'position');
+                //     })
+                //     ->preload()
+                //     ->searchable(),
                 SelectFilter::make('position')
-                    ->options(function () {
-                        return User::distinct('position')->pluck('position', 'position');
-                    })
+                    ->relationship('position', 'name')
                     ->preload()
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Position'),
             ])
             ->filtersTriggerAction(
                 fn(Action $action) => $action

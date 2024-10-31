@@ -22,7 +22,7 @@ class LeaveResource extends Resource
 
     protected static ?string $navigationGroup = 'Attendance Management';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8;
 
     public static function form(Form $form): Form
     {

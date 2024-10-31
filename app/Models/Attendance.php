@@ -59,4 +59,9 @@ class Attendance extends Model
 
         return $hours . ' jam ' . $minutes . ' menit';
     }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
+    }
 }

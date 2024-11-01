@@ -24,6 +24,11 @@ class ScheduleResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -52,6 +52,14 @@ class AttendanceController extends Controller
             ->where('user_id', auth()->user()->id)
             ->first();
 
+        if ($schedule == null) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
+            ]);
+        }
+
         $today = Carbon::today()->format('Y-m-d');
         $approvedLeave = Leave::where('user_id', Auth::user()->id)
             ->where('status', 'approved')
@@ -98,6 +106,14 @@ class AttendanceController extends Controller
         }
 
         $schedule = Schedule::where('user_id', Auth::user()->id)->first();
+
+        if ($schedule == null) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
+            ]);
+        }
 
         $today = Carbon::today()->format('Y-m-d');
         $approvedLeave = Leave::where('user_id', Auth::user()->id)

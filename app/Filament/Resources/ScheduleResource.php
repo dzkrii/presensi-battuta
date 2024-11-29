@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Auth;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 
 class ScheduleResource extends Resource
 {
@@ -24,10 +26,10 @@ class ScheduleResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
-    }
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::count();
+    // }
 
     public static function form(Form $form): Form
     {
@@ -42,6 +44,18 @@ class ScheduleResource extends Resource
                                     ->relationship('user', 'name')
                                     ->preload()
                                     ->searchable()
+                                    ->required()
+                                    ->live(),
+                                Select::make('day')
+                                    ->options([
+                                        'senin' => 'Senin',
+                                        'selasa' => 'Selasa',
+                                        'rabu' => 'Rabu',
+                                        'kamis' => 'Kamis',
+                                        'jumat' => 'Jumat',
+                                        'sabtu' => 'Sabtu',
+                                        'minggu' => 'Minggu'
+                                    ])
                                     ->required(),
                                 Forms\Components\Select::make('shift_id')
                                     ->relationship('shift', 'name')
@@ -76,6 +90,9 @@ class ScheduleResource extends Resource
                 Tables\Columns\ToggleColumn::make('is_banned')
                     ->label('Banned')
                     ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
+                Tables\Columns\TextColumn::make('day')
+                    ->label('Day')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('shift.name')
                     ->description(fn(Schedule $record): string => $record->shift->start_time . " - " . $record->shift->end_time)
                     ->sortable(),

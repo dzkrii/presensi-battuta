@@ -19,6 +19,7 @@ class Schedule extends Model
         'shift_id',
         'office_id',
         'is_banned',
+        'day',
     ];
 
     public function user(): BelongsTo

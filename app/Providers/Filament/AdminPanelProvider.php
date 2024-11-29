@@ -58,6 +58,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
             ])
-            ->favicon(asset('favicon.png'));
+            ->favicon(asset('favicon.png'))
+            ->sidebarCollapsibleOnDesktop();
     }
 }

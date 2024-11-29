@@ -48,46 +48,93 @@ class AttendanceController extends Controller
 
     public function getSchedule()
     {
-        $schedule = Schedule::with(['office', 'shift'])
-            ->where('user_id', auth()->user()->id)
-            ->first();
+        // $schedule = Schedule::with(['office', 'shift'])
+        //     ->where('user_id', auth()->user()->id)
+        //     ->first();
 
-        if ($schedule == null) {
+        // if ($schedule == null) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'data' => null,
+        //         'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
+        //     ]);
+        // }
+
+        // $today = Carbon::today()->format('Y-m-d');
+        // $approvedLeave = Leave::where('user_id', Auth::user()->id)
+        //     ->where('status', 'approved')
+        //     ->whereDate('start_date', '<=', $today)
+        //     ->whereDate('end_date', '>=', $today)
+        //     ->exists();
+
+        // if ($approvedLeave) {
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => null,
+        //         'message' => 'Anda tidak dapat melakukan presensi karena sedang cuti'
+        //     ]);
+        // }
+
+        // if ($schedule->is_banned) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'data' => null,
+        //         'message' => 'Akun anda telah di ban karena tertedeteksi melakukan kecurangan. Silahkan hubungi admin',
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $schedule,
+        //         'message' => 'Schedule retrieved successfully',
+        //     ]);
+        // }
+
+        $today = Carbon::now()->locale('id')->dayName; // Mengambil nama hari dalam bahasa Indonesia (senin, selasa, dll.)
+
+        // Ambil semua jadwal karyawan untuk hari ini
+        $schedules = Schedule::with(['office', 'shift'])
+            ->where('user_id', auth()->user()->id)
+            ->where('day', $today)
+            ->get();
+
+        if ($schedules->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'data' => null,
-                'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
+                'message' => 'Anda tidak memiliki jadwal hari ini, tidak dapat melakukan presensi',
             ]);
         }
 
-        $today = Carbon::today()->format('Y-m-d');
-        $approvedLeave = Leave::where('user_id', Auth::user()->id)
+        $approvedLeave = Leave::where('user_id', auth()->user()->id)
             ->where('status', 'approved')
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
+            ->whereDate('start_date', '<=', Carbon::today())
+            ->whereDate('end_date', '>=', Carbon::today())
             ->exists();
 
         if ($approvedLeave) {
             return response()->json([
                 'success' => true,
                 'data' => null,
-                'message' => 'Anda tidak dapat melakukan presensi karena sedang cuti'
+                'message' => 'Anda tidak dapat melakukan presensi karena sedang cuti.',
             ]);
         }
 
-        if ($schedule->is_banned) {
+        //* Cek apakah salah satu jadwal hari ini memiliki status banned
+        $isBanned = $schedules->contains('is_banned', true);
+
+        if ($isBanned) {
             return response()->json([
                 'success' => false,
                 'data' => null,
-                'message' => 'Akun anda telah di ban karena tertedeteksi melakukan kecurangan. Silahkan hubungi admin',
-            ]);
-        } else {
-            return response()->json([
-                'success' => true,
-                'data' => $schedule,
-                'message' => 'Schedule retrieved successfully',
+                'message' => 'Akun anda telah di-ban karena terdeteksi melakukan kecurangan. Silahkan hubungi admin.',
             ]);
         }
+
+        return response()->json([
+            'success' => true,
+            'data' => $schedules,
+            'message' => 'Schedule retrieved successfully.',
+        ]);
     }
 
     public function store(Request $request)
@@ -105,17 +152,33 @@ class AttendanceController extends Controller
             ], 422);
         }
 
-        $schedule = Schedule::where('user_id', Auth::user()->id)->first();
+        // $schedule = Schedule::where('user_id', Auth::user()->id)->first();
 
-        if ($schedule == null) {
+        // if ($schedule == null) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'data' => null,
+        //         'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
+        //     ]);
+        // }
+
+        $today = Carbon::now()->locale('id')->dayName; // Mengambil nama hari dalam bahasa Indonesia (senin, selasa, dll.)
+
+        // Ambil semua jadwal karyawan untuk hari ini
+        $schedule = Schedule::with(['office', 'shift'])
+            ->where('user_id', auth()->user()->id)
+            ->where('day', $today)
+            ->get();
+
+        if ($schedule->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'data' => null,
-                'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
+                'message' => 'Anda tidak memiliki jadwal hari ini, tidak dapat melakukan presensi',
             ]);
         }
 
-        $today = Carbon::today()->format('Y-m-d');
+        // $today = Carbon::today()->format('Y-m-d');
         $approvedLeave = Leave::where('user_id', Auth::user()->id)
             ->where('status', 'approved')
             ->whereDate('start_date', '<=', $today)

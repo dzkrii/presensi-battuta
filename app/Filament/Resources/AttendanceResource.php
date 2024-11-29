@@ -112,11 +112,12 @@ class AttendanceResource extends Resource
                     ->label('Waktu Masuk'),
                 Tables\Columns\TextColumn::make('end_time')
                     ->label('Waktu Pulang'),
-                // Tables\Columns\TextColumn::make('work_duration')
-                //     ->label('Durasi Kerja')
-                //     ->getStateUsing(function ($record) {
-                //         return $record->workDuration();
-                //     })
+                Tables\Columns\TextColumn::make('work_duration')
+                    ->label('Durasi Kerja')
+                    ->getStateUsing(function ($record) {
+                        return $record->workDuration();
+                    })
+                    ->visible(fn() => Auth::user()->hasRole('super_admin')),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

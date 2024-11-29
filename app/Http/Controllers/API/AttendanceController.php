@@ -89,7 +89,7 @@ class AttendanceController extends Controller
         //     ]);
         // }
 
-        $today = Carbon::now()->locale('id')->dayName; // Mengambil nama hari dalam bahasa Indonesia (senin, selasa, dll.)
+        $today = Carbon::now()->locale('id')->dayName;
 
         // Ambil semua jadwal karyawan untuk hari ini
         $schedules = Schedule::with(['office', 'shift'])
@@ -119,7 +119,6 @@ class AttendanceController extends Controller
             ]);
         }
 
-        //* Cek apakah salah satu jadwal hari ini memiliki status banned
         $isBanned = $schedules->contains('is_banned', true);
 
         if ($isBanned) {
@@ -130,9 +129,10 @@ class AttendanceController extends Controller
             ]);
         }
 
+        // Mengembalikan hanya jadwal pertama untuk memastikan format tetap Map
         return response()->json([
             'success' => true,
-            'data' => $schedules,
+            'data' => $schedules->first(), // Kembalikan objek pertama
             'message' => 'Schedule retrieved successfully.',
         ]);
     }
@@ -152,37 +152,21 @@ class AttendanceController extends Controller
             ], 422);
         }
 
-        // $schedule = Schedule::where('user_id', Auth::user()->id)->first();
+        $schedule = Schedule::where('user_id', Auth::user()->id)->first();
 
-        // if ($schedule == null) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'data' => null,
-        //         'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
-        //     ]);
-        // }
-
-        $today = Carbon::now()->locale('id')->dayName; // Mengambil nama hari dalam bahasa Indonesia (senin, selasa, dll.)
-
-        // Ambil semua jadwal karyawan untuk hari ini
-        $schedule = Schedule::with(['office', 'shift'])
-            ->where('user_id', auth()->user()->id)
-            ->where('day', $today)
-            ->get();
-
-        if ($schedule->isEmpty()) {
+        if ($schedule == null) {
             return response()->json([
                 'success' => false,
                 'data' => null,
-                'message' => 'Anda tidak memiliki jadwal hari ini, tidak dapat melakukan presensi',
+                'message' => 'Anda belum memiliki jadwal kerja. Silahkan hubungi admin',
             ]);
         }
 
         // $today = Carbon::today()->format('Y-m-d');
         $approvedLeave = Leave::where('user_id', Auth::user()->id)
             ->where('status', 'approved')
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
+            ->whereDate('start_date', '<=', Carbon::today()->format('Y-m-d'))
+            ->whereDate('end_date', '>=', Carbon::today()->format('Y-m-d'))
             ->exists();
 
         if ($approvedLeave) {

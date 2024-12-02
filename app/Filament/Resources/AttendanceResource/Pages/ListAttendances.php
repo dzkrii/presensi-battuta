@@ -54,7 +54,7 @@ class ListAttendances extends ListRecords
                     if ($diffInMinutes > 20) {
                         Notification::make()
                             ->title('Tidak dapat melakukan presensi')
-                            ->body('Anda tidak dapat melakukan presensi diluar jadwal yang telah ditentukan.')
+                            ->body('Anda dapat melakukan presensi paling cepat 20 menit sebelum jadwal kerja.')
                             ->warning()
                             ->send();
                         return false; // Tombol tidak muncul

@@ -18,7 +18,13 @@ class WorkHourResource extends Resource
 {
     protected static ?string $model = WorkHour::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clock';
+
+    protected static ?string $navigationLabel = 'Work Hours';
+
+    protected static ?string $navigationGroup = 'Attendance Management';
+
+    protected static ?int $navigationSort = 9;
 
     public static function form(Form $form): Form
     {

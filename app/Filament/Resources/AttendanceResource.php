@@ -146,14 +146,14 @@ class AttendanceResource extends Resource
                     })
                     ->visible(fn() => Auth::user()->hasRole('super_admin')),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('start_time', 'desc')
             ->filters([
                 Filter::make('created_at')
                     ->form([
                         DatePicker::make('created_from')
-                            ->default(now()),
+                            ->default(Carbon::now()->startOfMonth()),
                         DatePicker::make('created_until')
-                            ->default(now()),
+                            ->default(Carbon::now()->endOfMonth()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

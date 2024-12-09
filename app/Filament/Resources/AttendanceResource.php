@@ -146,7 +146,7 @@ class AttendanceResource extends Resource
                     })
                     ->visible(fn() => Auth::user()->hasRole('super_admin')),
             ])
-            ->defaultSort('start_time', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Filter::make('created_at')
                     ->form([

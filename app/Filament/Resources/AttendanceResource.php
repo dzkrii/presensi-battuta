@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Auth;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\Indicator;
@@ -44,25 +45,51 @@ class AttendanceResource extends Resource
                     ->schema([
                         Forms\Components\Section::make()
                             ->schema([
-                                Forms\Components\Select::make('user.name')
-                                    ->label('Name')
-                                    ->relationship(name: 'user', titleAttribute: 'name')
-                                    ->disabled(fn() => !Auth::user()->hasRole('super_admin'))
-                                    ->required(),
                                 Forms\Components\TimePicker::make('schedule_start_time')
                                     ->label('Jadwal Masuk')
-                                    ->disabled(fn() => !Auth::user()->hasRole('super_admin'))
+                                    ->default('07:00:00')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin'))
                                     ->required(),
                                 Forms\Components\TimePicker::make('schedule_end_time')
                                     ->label('Jadwal Pulang')
-                                    ->disabled(fn() => !Auth::user()->hasRole('super_admin'))
+                                    ->default('20:30:00')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin'))
                                     ->required(),
+                                Forms\Components\TextInput::make('schedule_latitude')
+                                    ->label('Latitude Kantor')
+                                    ->default('3.596821772442')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
+                                Forms\Components\TextInput::make('schedule_longitude')
+                                    ->label('Longitude Kantor')
+                                    ->default('98.665208816528')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
+                                Forms\Components\TextInput::make('start_latitude')
+                                    ->label('Latitude')
+                                    ->default('3.596821772442')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
+                                Forms\Components\TextInput::make('start_longitude')
+                                    ->label('Longitude')
+                                    ->default('98.665208816528')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
+                                Forms\Components\TextInput::make('end_latitude')
+                                    ->label('Latitude')
+                                    ->default('3.596821772442')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
+                                Forms\Components\TextInput::make('end_longitude')
+                                    ->label('Longitude')
+                                    ->default('98.665208816528')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin')),
                             ]),
                     ]),
                 Forms\Components\Group::make()
                     ->schema([
                         Forms\Components\Section::make()
                             ->schema([
+                                Forms\Components\Select::make('user_id')
+                                    ->relationship('user', 'name')
+                                    ->label('Name')
+                                    ->hidden(fn() => !Auth::user()->hasRole('super_admin'))
+                                    ->required(),
                                 Forms\Components\TimePicker::make('start_time')
                                     ->label('Waktu Masuk')
                                     ->required(),

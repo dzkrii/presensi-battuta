@@ -17,7 +17,9 @@ class ListAttendances extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            Actions\CreateAction::make(),
+
+            Action::make('Buat Presensi')
                 ->url(route('presensi'))
                 ->visible(function () {
                     //* ambil user yang sedang login

@@ -47,15 +47,15 @@ class AttendanceResource extends Resource
                                 Forms\Components\Select::make('user.name')
                                     ->label('Name')
                                     ->relationship(name: 'user', titleAttribute: 'name')
-                                    ->disabled()
+                                    ->disabled(fn() => !Auth::user()->hasRole('super_admin'))
                                     ->required(),
                                 Forms\Components\TimePicker::make('schedule_start_time')
                                     ->label('Jadwal Masuk')
-                                    ->disabled()
+                                    ->disabled(fn() => !Auth::user()->hasRole('super_admin'))
                                     ->required(),
                                 Forms\Components\TimePicker::make('schedule_end_time')
                                     ->label('Jadwal Pulang')
-                                    ->disabled()
+                                    ->disabled(fn() => !Auth::user()->hasRole('super_admin'))
                                     ->required(),
                             ]),
                     ]),

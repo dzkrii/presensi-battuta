@@ -92,15 +92,15 @@ class WorkHourResource extends Resource
                     ->label('Nama Karyawan')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->sortable()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('position.name')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('current_work_hours')
                     ->label('Total Jam Kerja')
                     ->getStateUsing(function ($record) {
                         // Tentukan rentang tanggal
-                        $startDate = Carbon::create(2024, 12, 2)->startOfDay();
-                        $endDate = Carbon::create(2024, 12, 7)->endOfDay();
+                        $startDate = Carbon::create(2024, 12, 1)->startOfDay();
+                        $endDate = Carbon::create(2024, 12, 28)->endOfDay();
 
                         // Ambil data presensi dalam rentang tanggal tersebut
                         $attendances = $record->attendances()
@@ -125,6 +125,54 @@ class WorkHourResource extends Resource
                         $totalMinutes = $totalMinutes % 60;
 
                         return $totalHours . ' jam ' . $totalMinutes . ' menit';
+                    }),
+                Tables\Columns\TextColumn::make('missing_work_hours')
+                    ->label('Kekurangan Jam Kerja')
+                    ->getStateUsing(function ($record) {
+                        // Tentukan rentang tanggal
+                        $startDate = Carbon::create(2024, 12, 1)->startOfDay();
+                        $endDate = Carbon::create(2024, 12, 28)->endOfDay();
+
+                        // Ambil total jam kerja yang harus dipenuhi
+                        // $totalHours = $record->total_hours; // Pastikan field 'total_hours' ada di tabel 'work_hours'
+                        $totalHours = 32; // Pastikan field 'total_hours' ada di tabel 'work_hours'
+
+                        // Hitung total jam kerja yang telah dicatat
+                        $attendances = $record->attendances()
+                            ->whereBetween('created_at', [$startDate, $endDate])
+                            ->whereNotNull('end_time')
+                            ->get();
+
+                        $workedHours = 0;
+                        $workedMinutes = 0;
+
+                        foreach ($attendances as $attendance) {
+                            $checkIn = Carbon::parse($attendance->start_time);
+                            $checkOut = Carbon::parse($attendance->end_time);
+                            $duration = $checkIn->diff($checkOut);
+
+                            $workedHours += $duration->h;
+                            $workedMinutes += $duration->i;
+                        }
+
+                        // Konversi menit menjadi jam jika lebih dari 60 menit
+                        $workedHours += intdiv($workedMinutes, 60);
+                        $workedMinutes = $workedMinutes % 60;
+
+                        // Hitung jam kerja yang tidak terpenuhi
+                        $totalMinutes = $totalHours * 60; // Total jam kerja yang harus dipenuhi dalam menit
+                        $workedMinutesTotal = ($workedHours * 60) + $workedMinutes; // Total jam kerja yang telah dicatat dalam menit
+
+                        $remainingMinutes = $totalMinutes - $workedMinutesTotal;
+
+                        if ($remainingMinutes > 0) {
+                            $remainingHours = floor($remainingMinutes / 60);
+                            $remainingMinutes = $remainingMinutes % 60;
+
+                            return "{$remainingHours} jam {$remainingMinutes} menit";
+                        }
+
+                        return "0 jam 0 menit";
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

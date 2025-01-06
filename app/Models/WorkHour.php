@@ -26,7 +26,9 @@ class WorkHour extends Model
         $user = $this->user;
 
         // Mendapatkan awal dan akhir bulan
-        $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
+        // $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
+        // $endOfMonth = $startOfMonth->copy()->endOfMonth();
+        $startOfMonth = Carbon::create(2024, 12, 1);
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
         // Ambil data presensi karyawan dalam rentang waktu tersebut
